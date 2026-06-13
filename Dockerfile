@@ -32,7 +32,10 @@ RUN composer install --no-dev --optimize-autoloader
 # Setup storage, cache, and database permissions (SQLite needs write access to the database folder)
 RUN touch database/database.sqlite && chown -R www-data:www-data storage bootstrap/cache database database/database.sqlite
 
-# Expose port 80 (Render will map this automatically)
-EXPOSE 80
+# Change Apache port from 80 to 7860 (required by Hugging Face Spaces, also supported by Render)
+RUN sed -i 's/Listen 80/Listen 7860/' /etc/apache2/ports.conf
+RUN sed -i 's/<VirtualHost \*:80>/<VirtualHost \*:7860>/' /etc/apache2/sites-available/000-default.conf
+
+EXPOSE 7860
 
 CMD php artisan migrate --force && apache2-foreground
