@@ -29,10 +29,10 @@ COPY . .
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 RUN composer install --no-dev --optimize-autoloader
 
-# Setup storage and cache permissions
-RUN chown -R www-data:www-data storage bootstrap/cache
+# Setup storage, cache, and database permissions (SQLite needs write access to the database folder)
+RUN touch database/database.sqlite && chown -R www-data:www-data storage bootstrap/cache database database/database.sqlite
 
 # Expose port 80 (Render will map this automatically)
 EXPOSE 80
 
-CMD ["apache2-foreground"]
+CMD php artisan migrate --force && apache2-foreground
