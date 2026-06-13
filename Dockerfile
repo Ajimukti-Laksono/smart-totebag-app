@@ -29,8 +29,8 @@ COPY . .
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 RUN composer install --no-dev --optimize-autoloader
 
-# Setup storage, cache, and database permissions (SQLite needs write access to the database folder)
-RUN touch database/database.sqlite && chown -R www-data:www-data storage bootstrap/cache database database/database.sqlite
+# Setup storage, cache, and database permissions (SQLite needs write access, globally writable for UID 1000 compatibility on Hugging Face)
+RUN touch database/database.sqlite && chmod -R 777 storage bootstrap/cache database database/database.sqlite
 
 # Change Apache port from 80 to 7860 (required by Hugging Face Spaces, also supported by Render)
 RUN sed -i 's/Listen 80/Listen 7860/' /etc/apache2/ports.conf
